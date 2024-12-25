@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: ;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background-color: #f4f4f9;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            width: 100%;
+        }
+        header h1 {
+            margin: 0;
+        }
+
+        /* Wheel Container */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-top: 50px;
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-color: black;
+            border-radius: 50%;
+            transform-origin: center;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 10px solid transparent;
+            box-sizing: border-box;
+        }
+
+        /* Images inside wheel */
+        .wheel .img-container {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+
+        .wheel .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: rotate(45deg);
+            border-radius: 50%;
+        }
+
+        /* Position images inside their respective sections */
+        .yellow { top: 0; left: 0; }    
+        .red { top: 0; right: 0; }      
+        .blue { bottom: 0; left: 0; }   
+        .green { bottom: 0; right: 0; } 
+
+        /* Arrow in Center */
+        .wheel-pointer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform: translate(-50%, -50%);
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid red;
+            z-index: 10;
+        }
+
+        /* Spin Button */
+        .spin-button {
+            background: #4CAF50;
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 10px;
+            width: 250px;
+            height: 60px;
+            transition: background 0.3s ease;
+        }
+
+        .spin-button:hover {
+            background: #45a049;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+        .modal-content {
+            background: white;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+        }
+        .modal-content h2 {
+            color: #FF6347;
+            font-size: 24px;
+        }
+        .modal-content button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        /* Share Section */
+        #shareSection {
+            display: none;
+        }
+
+        .share-button {
+            background: #25D366; /* WhatsApp green */
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .progress-bar-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        /* Footer */
+        footer {
+            background: black;
+            color: white;
+            padding: 15px 0;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Spin & Win</h1>
+    </header>
+
+    <div class="wheel-container">
+        <div class="wheel" id="wheel">
+            <!-- Images inside wheel -->
+            <div class="img-container yellow">
+                <img src="images/money.jpg" alt="Cash">
+            </div>
+            <div class="img-container red">
+                <img src="images/retry.jpg" alt="Retry">
+            </div>
+            <div class="img-container blue">
+                <img src="images/iphone.jpg" alt="iPhone">
+            </div>
+            <div class="img-container green">
+                <img src="images/betterluck.jpg" alt="Better Luck">
+            </div>
+        </div>
+        <div class="wheel-pointer"></div>
+    </div>
+
+    <button class="spin-button" id="spinButton" onclick="spinWheel()">Spin Now</button>
+
+    <!-- First Popup (Congratulations for one more chance) -->
+    <div class="modal" id="firstPopup">
+        <div class="modal-content">
+            <h2>Congratulations!</h2>
+            <p>You have one more chance!</p>
+            <button onclick="closeFirstPopup()">OK</button>
+        </div>
+    </div>
+
+    <!-- Second Popup (You won iPhone and claim button) -->
+    <div class="modal" id="secondPopup">
+        <div class="modal-content">
+            <h2>Congratulations!</h2>
+            <p>You won an iPhone!</p>
+            <button onclick="showShareSection()">Claim</button>
+        </div>
+    </div>
+
+    <!-- Share Section -->
+    <div id="shareSection" class="modal">
+        <div class="modal-content">
+            <h2>Share with 4 friends to claim your reward!</h2>
+            <p>Click on the button below to share on WhatsApp.</p>
+            <a href="https://wa.me/?text=Check%20out%20this%20website%20for%20Spin%20and%20Win!" target="_blank" class="share-button" onclick="increaseProgress()">Share on WhatsApp</a>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 Spin & Win. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let spins = 0;
+        let spinAngle = 0;
+        let progress = 0;
+        const angles = [45, 135, 225, 315]; // Angles for prizes
+        const prizes = ["One More Chance", "Retry", "iPhone", "Better Luck Next Time"];
+
+        function spinWheel() {
+            if (spins >= 2) {
+                showModal("You have used all your spins!", false);
+                return;
+            }
+
+            spins++;
+            const wheel = document.getElementById('wheel');
+            const randomIndex = spins === 2 ? 2 : Math.floor(Math.random() * angles.length);
+            const currentAngle = angles[randomIndex];
+            spinAngle += 360 * 5 + currentAngle; // Spins 5 times and stops at the prize
+
+            wheel.style.transform = `rotate(${spinAngle}deg)`;
+
+            setTimeout(() => {
+                const prizeMessage = spins === 1 
+                    ? "You have one more chance!" 
+                    : "You won an iPhone!";
+                const showHeader = spins === 2; // Show the "Congratulations" heading only on the second spin
+                if (spins === 1) {
+                    showFirstPopup(prizeMessage);
+                } else {
+                    showSecondPopup(prizeMessage);
+                }
+            }, 4000); // Waits for spin to complete (4 seconds)
+        }
+
+        function showFirstPopup(message) {
+            document.getElementById('firstPopup').style.display = 'flex';
+        }
+
+        function closeFirstPopup() {
+            document.getElementById('firstPopup').style.display = 'none';
+        }
+
+        function showSecondPopup(message) {
+            document.getElementById('secondPopup').style.display = 'flex';
+        }
+
+        function showShareSection() {
+            document.getElementById('secondPopup').style.display = 'none';
+            document.getElementById('shareSection').style.display = 'flex';
+        }
+
+        function increaseProgress() {
+            progress += 25;
+            document.getElementById('progressBar').style.width = progress + "%";
+        }
+    </script>
+</body>
+</html>
